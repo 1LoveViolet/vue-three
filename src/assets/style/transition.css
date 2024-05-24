@@ -1,0 +1,23 @@
+.transitionBody {
+    transition: all 0.4s ease-out;
+}
+
+.transitionLeft-enter,
+.transitionRight-leave-active {
+    -webkit-transform: translate(100%, 0);
+    transform: translate(100%, 0);
+}
+
+.transitionLeft-leave-active,
+.transitionRight-enter {
+    -webkit-transform: translate(-100%, 0);
+    transform: translate(-100%, 0);
+}
+
+.transitionLeft-enter-active,
+.transitionRight-enter-active {
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
