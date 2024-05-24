@@ -17,7 +17,7 @@ const router = new VueRouter({
       component: three1,
     },
   ],
-  mode: "history",
+  mode: "hash",
 });
 
 // router.beforeEach((to, from, next) => {});

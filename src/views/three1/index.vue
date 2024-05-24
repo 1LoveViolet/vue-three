@@ -15,6 +15,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import * as d3 from "d3";
 import axios from "network/axios";
+import ouyang from "assets/images/ouyang.js";
 export default {
   data() {
     return {
@@ -329,9 +330,7 @@ export default {
         uniforms: {
           uTime: { value: 0 },
           uTexture: {
-            value: new THREE.TextureLoader().load(
-              require("@/assets/images/ouyang2.png")
-            ),
+            value: new THREE.TextureLoader().load(ouyang),
           },
         },
         transparent: true,
