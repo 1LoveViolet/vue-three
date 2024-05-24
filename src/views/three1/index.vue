@@ -16,6 +16,7 @@ import Stats from "three/examples/jsm/libs/stats.module.js";
 import * as d3 from "d3";
 import axios from "network/axios";
 import ouyang from "assets/images/ouyang.js";
+3;
 export default {
   data() {
     return {
@@ -406,6 +407,25 @@ export default {
       );
       this.scene.add(fireflies);
     },
+    snake() {
+      window.addEventListener("mousemove", (e) => {
+        const x = (e.clientX / innerWidth) * 2 - 1;
+        const y = ((innerHeight - e.clientY) / innerHeight) * 2 - 1;
+        gsap.to(this.camera.position, {
+          duration: 1,
+          x: x,
+        });
+        gsap.to(this.camera.position, {
+          duration: 1,
+          y: y,
+        });
+        // xQuickTo(cameraPosition.x + x).play();
+        // yQuickTo(cameraPosition.y + y).play();
+      });
+    },
+    gsapFun() {
+      gsap.to("#three", { duration: 2, x: 300 });
+    },
     clearScene() {
       cancelAnimationFrame(this.render);
       this.scene.traverse((child) => {
@@ -494,6 +514,12 @@ export default {
       this.controls.autoRotate = false;
       // 控制垂直角度的旋转范围
       // controls;
+
+      this.controls.enableZoom = false;
+      // to disable rotation
+      this.controls.enableRotate = false;
+      // to disable pan
+      this.controls.enablePan = false;
     },
     //初始化光源
     initLight() {
@@ -528,6 +554,7 @@ export default {
       this.initControls();
       this.initLight();
       this.ownFun();
+      this.snake();
       this.render();
     },
   },
