@@ -10,8 +10,8 @@ import { gsap } from "gsap";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
-import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import Stats from "three/examples/jsm/libs/stats.module.js";
 import * as d3 from "d3";
 import axios from "network/axios";
@@ -116,9 +116,10 @@ export default {
         antialias: true,
         alpha: true,
       });
-      this.renderer.setClearAlpha(0.2);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.physicallyCorrectLights = true;
+      this.renderer.setClearColor(0xeeeeee);
+      document.body.appendChild(this.renderer.domElement);
     },
     // 初始化相机
     initCamera() {
@@ -157,8 +158,8 @@ export default {
       this.firefliesMaterial.uniforms.uTime.value = time;
       this.textMaterial.uniforms.uTime.value = time;
       // mesh.rotation.y = time;
-      requestAnimationFrame(render);
-      this.renderer.render(scene, camera);
+      requestAnimationFrame(this.render);
+      this.renderer.render(this.scene, camera);
       this.controls.update();
       this.stats.update(); //更新性能插件
     },

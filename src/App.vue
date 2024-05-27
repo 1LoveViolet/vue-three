@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <transition :name="transitionName">
-      <router-view class="transitionBody"></router-view>
+      <router-view class="transitionBody" :key="$route.fullPath"></router-view>
     </transition>
     <!-- <three1 /> -->
   </div>

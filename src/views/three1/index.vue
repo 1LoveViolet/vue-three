@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas id="three"></canvas>
+    <canvas id="three" ref="three_container"></canvas>
   </div>
 </template>
   
@@ -33,19 +33,39 @@ export default {
       //外层圆圈
       particles: null,
       stats: null,
+      animationId: null,
     };
   },
   created() {},
   mounted() {
+    this.$router.push(0);
     this.stats = new Stats();
     this.clock = new THREE.Clock();
     document.body.appendChild(this.stats.domElement);
     this.start();
+    let gl = this.renderer.getContext();
+    console.log("WebGL 渲染器的上下文", gl);
   },
-  destroyed() {
-    // this.clearScene();
-    // this.destroyThreejs();
-    console.log("执行destroyed钩子函数");
+  beforeDestroy() {
+    cancelAnimationFrame(this.animationId);
+    // 清理 WebGL 上下文
+    // let gl = this.renderer.getContext();
+    // let extension = gl.getExtension("WEBGL_lose_context");
+    // extension.loseContext();
+    // 清理 Three.js 场景
+    while (this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
+    }
+    this.scene.traverse((object) => {
+      if (object.isMesh) {
+        object.geometry.dispose();
+        object.material.dispose();
+      }
+    });
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
+    // console.log("已销毁Three.js 场景");
+    console.log(this.scene);
   },
   methods: {
     templateshader() {
@@ -408,65 +428,21 @@ export default {
       this.scene.add(fireflies);
     },
     snake() {
-      window.addEventListener("mousemove", (e) => {
-        const x = (e.clientX / innerWidth) * 2 - 1;
-        const y = ((innerHeight - e.clientY) / innerHeight) * 2 - 1;
-        gsap.to(this.camera.position, {
-          duration: 1,
-          x: x,
+      if (this.camera) {
+        window.addEventListener("mousemove", (e) => {
+          const x = (e.clientX / innerWidth) * 2 - 1;
+          const y = ((innerHeight - e.clientY) / innerHeight) * 2 - 1;
+          gsap.to(this.camera.position, {
+            duration: 1,
+            x: x,
+          });
+          gsap.to(this.camera.position, {
+            duration: 1,
+            y: y,
+          });
+          // xQuickTo(cameraPosition.x + x).play();
+          // yQuickTo(cameraPosition.y + y).play();
         });
-        gsap.to(this.camera.position, {
-          duration: 1,
-          y: y,
-        });
-        // xQuickTo(cameraPosition.x + x).play();
-        // yQuickTo(cameraPosition.y + y).play();
-      });
-    },
-    gsapFun() {
-      gsap.to("#three", { duration: 2, x: 300 });
-    },
-    clearScene() {
-      cancelAnimationFrame(this.render);
-      this.scene.traverse((child) => {
-        if (child.material) {
-          child.material.dispose();
-        }
-        if (child.geometry) {
-          child.geometry.dispose();
-        }
-        child = null;
-      });
-      // this.sceneDomElement.innerHTML = "";
-      this.renderer.dispose();
-      this.renderer.forceContextLoss();
-      this.renderer.clear();
-      this.scene.clear();
-      console.log("clearScene");
-    },
-    destroyThreejs() {
-      try {
-        this.renderer.dispose();
-        this.renderer.forceContextLoss();
-        this.renderer.content = null;
-        let gl = this.renderer.domElement.getContext("webgl");
-        if (gl && gl.getExtension("WEBGL_lose_context")) {
-          gl.getExtension("WEBGL_lose_context").loseContext();
-        }
-        this.renderer = null;
-        this.camera = null;
-        this.scene.traverse((child) => {
-          if (child.material) {
-            child.material.dispose();
-          }
-          if (child.geometry) {
-            child.geometry.dispose();
-          }
-          child = null;
-        });
-        this.scene = null;
-      } catch (e) {
-        console.error("Failed to destroy threejs", e);
       }
     },
     // 初始化场景
@@ -490,9 +466,10 @@ export default {
         antialias: true,
         alpha: true,
       });
-      this.renderer.setClearAlpha(0.2);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.physicallyCorrectLights = true;
+      this.renderer.setClearColor(0xeeeeee);
+      document.body.appendChild(this.renderer.domElement);
     },
     // 初始化相机
     initCamera() {
@@ -528,6 +505,9 @@ export default {
       this.scene.add(directionalLight);
     },
     render() {
+      if (!this.renderer) {
+        return;
+      }
       // 触底弹跳
       const time = this.clock.getElapsedTime();
       this.material.uniforms.uTime.value = time;
@@ -536,7 +516,7 @@ export default {
       this.textMaterial.uniforms.uTime.value = time;
       this.particles.rotation.y = time;
       // mesh.rotation.y = time;
-      requestAnimationFrame(this.render);
+      this.animationId = requestAnimationFrame(this.render);
       this.renderer.render(this.scene, this.camera);
       this.controls.update();
       this.stats.update(); //更新性能插件
@@ -548,7 +528,12 @@ export default {
       this.shader4();
     },
     start() {
+      console.log("运行了start()");
       this.initRenderer();
+      // 设置 WebGL 上下文
+      // let gl = this.renderer.getContext();
+      // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      // gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
       this.initScene();
       this.initCamera();
       this.initControls();
