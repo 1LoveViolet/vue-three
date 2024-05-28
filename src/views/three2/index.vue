@@ -32,22 +32,15 @@ export default {
   },
   created() {},
   mounted() {
-    this.$router.push(0);
     this.stats = new Stats();
     this.clock = new THREE.Clock();
     document.body.appendChild(this.stats.domElement);
     this.start();
-    // 获取 WebGL 渲染器的上下文
-    let gl = this.renderer.getContext();
-    console.log("WebGL 渲染器的上下文", gl);
+    window.addEventListener("resize", this.onWindowResize);
   },
   beforeDestroy() {
+    console.log("销毁了three");
     cancelAnimationFrame(this.animationId);
-    // 清理 WebGL 上下文
-    // let gl = this.renderer.getContext();
-    // let extension = gl.getExtension("WEBGL_lose_context");
-    // extension.loseContext();
-    // 清理 Three.js 场景
     while (this.scene.children.length > 0) {
       this.scene.remove(this.scene.children[0]);
     }
@@ -59,10 +52,42 @@ export default {
     });
     this.renderer.dispose();
     this.renderer.forceContextLoss();
-    // console.log("已销毁Three.js 场景");
-    console.log(this.scene);
   },
+  activated() {
+    this.stats = new Stats();
+    this.clock = new THREE.Clock();
+    document.body.appendChild(this.stats.domElement);
+    this.start();
+    // onresize 事件会在窗口被调整大小时发生
+    window.addEventListener("resize", this.onWindowResize);
+  },
+  // deactivated() {
+  //   console.log("销毁了three");
+  //   cancelAnimationFrame(this.animationId);
+  //   while (this.scene.children.length > 0) {
+  //     this.scene.remove(this.scene.children[0]);
+  //   }
+  //   this.scene.traverse((object) => {
+  //     if (object.isMesh) {
+  //       object.geometry.dispose();
+  //       object.material.dispose();
+  //     }
+  //   });
+  //   this.renderer.dispose();
+  //   this.renderer.forceContextLoss();
+  // },
   methods: {
+    onWindowResize() {
+      // 重置渲染器输出画布canvas尺寸
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      // 全屏情况下：设置观察范围长宽比aspect为窗口宽高比
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      // 渲染器执行render方法的时候会读取相机对象的投影矩阵属性projectionMatrix
+      // 但是不会每渲染一帧，就通过相机的属性计算投影矩阵(节约计算资源)
+      // 如果相机的一些属性发生了变化，需要执行updateProjectionMatrix ()方法更新相机的投影矩阵
+      this.camera.updateProjectionMatrix();
+    },
+
     toThree1() {
       this.$router.push("/three1");
     },

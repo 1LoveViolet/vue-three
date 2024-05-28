@@ -1,30 +1,21 @@
 <template>
   <div id="app">
-    <transition :name="transitionName">
-      <router-view class="transitionBody" :key="$route.fullPath"></router-view>
-    </transition>
-    <!-- <three1 /> -->
+    <navbar />
+    <!-- <keep-alive> -->
+    <router-view :key="$route.path"></router-view>
+    <!-- </keep-alive> -->
   </div>
 </template>
 
 <script>
+const navbar = () => import("components/navbar/index.vue");
 const three1 = () => import("views/three1/index.vue");
 export default {
   name: "App",
-  components: { three1 },
+  components: { three1, navbar },
+  props: ["menuItems"],
   data() {
-    return {
-      transitionName: "transitionLeft",
-    };
-  },
-  watch: {
-    $route(to, from) {
-      const arr = ["/three1"];
-      this.transitionName =
-        arr.indexOf(to.path) > arr.indexOf(from.path)
-          ? "transitionLeft"
-          : "transitionRight";
-    },
+    return {};
   },
 };
 </script>
@@ -37,5 +28,8 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+body {
+  background-color: rgb(0, 0, 0);
 }
 </style>

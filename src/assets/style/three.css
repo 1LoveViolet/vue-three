@@ -3,7 +3,8 @@ body {
     position: relative;
     /* background: url("./img/mapback.png") center no-repeat;
     background-size: cover; */
-    transition: all 0.3s;
+    transition: all 3s;
+    background-color: rgb(0, 0, 0);
 }
 
 #three {
